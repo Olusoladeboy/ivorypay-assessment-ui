@@ -20,8 +20,8 @@
 // });
 
 const nextConfig = {
-    // output: 'export',
-    // reactStrictMode: true,
+    output: 'standalone',
+    reactStrictMode: true,
     swcMinify: true,
     images: {
         unoptimized: true,
