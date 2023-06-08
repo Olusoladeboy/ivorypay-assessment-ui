@@ -21,7 +21,7 @@
 
 const nextConfig = {
     // output: 'export',
-    reactStrictMode: true,
+    // reactStrictMode: true,
     swcMinify: true,
     images: {
         unoptimized: true,
