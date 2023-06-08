@@ -17,7 +17,8 @@ import {
 } from "../../api.service";
 import { useEffect, useState } from "react";
 import { ColumnsType } from "antd/es/table";
-import { usePaystackPayment } from "react-paystack";
+import usePayStackPayment from "../paystack/usePayStackPayment";
+// import { usePaystackPayment } from "react-paystack";
 
 type NotificationType = "success" | "info" | "warning" | "error";
 
@@ -26,6 +27,7 @@ export default function Checkout() {
   const [transactions, setTransactions] = useState<TransactionInterface[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [formData, setFormData] = useState<TransactionInterface | any>();
+  const initializePayment = usePayStackPayment();
 
   const [api, contextHolder] = notification.useNotification();
 
@@ -103,32 +105,16 @@ export default function Checkout() {
 
   const onFinish = async (data: TransactionInterface) => {
     setFormData(data);
-    // await initializePayment(onSuccess, onClose);
-  };
-
-  const PaymentButton = () => {
-    const [config, setConfig] = useState({
-      reference: new Date().getTime().toString(),
-      email: "user@example.com",
-      amount: 20000,
-      publicKey: `${process.env.NEXT_PUBLIC_PAYSTACK_KEY}`,
-    });
-    const initializePayment = usePaystackPayment(config);
-
-    return (
-      <Form.Item style={{ textAlign: "center", width: "100%" }}>
-        <Button
-          onClick={() => {
-            setLoading(true);
-            initializePayment(onSuccess, onClose);
-          }}
-          disabled={loading}
-          type="primary"
-          htmlType="submit"
-        >
-          {!loading ? <span>Submit</span> : <Spin />}
-        </Button>
-      </Form.Item>
+    setLoading(true);
+    await initializePayment(
+      {
+        reference: new Date().getTime().toString(),
+        email: data.email,
+        amount: data.price * 100,
+        publicKey: `${process.env.NEXT_PUBLIC_PAYSTACK_KEY}`,
+      },
+      onSuccess,
+      onClose
     );
   };
 
@@ -182,7 +168,12 @@ export default function Checkout() {
           >
             <InputNumber name="price" min={1} style={{ width: "100%" }} />
           </Form.Item>
-          <PaymentButton />
+          <Form.Item style={{ textAlign: "center", width: "100%" }}>
+            <Button disabled={loading} type="primary" htmlType="submit">
+              {!loading ? <span>Submit</span> : <Spin />}
+            </Button>
+          </Form.Item>
+          {/* <PaymentButton /> */}
         </Form>
       </div>
       <div className="mt-10">
